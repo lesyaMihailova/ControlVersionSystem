@@ -1,0 +1,4 @@
+*.suo
+/ControlVersionSystem/obj
+/ControlVersionSystem/bin
+*.user
