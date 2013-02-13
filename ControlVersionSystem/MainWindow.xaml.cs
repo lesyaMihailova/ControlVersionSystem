@@ -21,14 +21,20 @@ namespace WpfApplication1
     public partial class MainWindow : Window
     {
         public string folderName;
+        const string SOURCEPATH = @"D:\_builds\прочее";
+        const string DIR = @"D:\_builds";
+        Dictionary<string, string> openLogFile = new Dictionary<string, string>();
+            
         public MainWindow()
         {
             InitializeComponent();
-            getListFS();        
+            getListFS();
+            addElemInDictionary();
         }
         string pathToFile = "";
         string item; //для сборки
         string itemVers; //для версии
+        
 
         private void button1_Click(object sender, RoutedEventArgs e) //кнопка ДОБАВИТЬ
         {
@@ -39,7 +45,7 @@ namespace WpfApplication1
             }
             string _fullName = openFileDialog1.FileName;
             string _fileName=System.IO.Path.GetFileName(_fullName);
-            string sourcePath = @"D:\_builds\прочее";
+            string sourcePath = SOURCEPATH;  // @"D:\_builds\прочее";
             var _dlg = new System.Windows.Forms.FolderBrowserDialog();
             _dlg.ShowDialog();
             string targetPath = _dlg.SelectedPath;
@@ -80,7 +86,7 @@ namespace WpfApplication1
             }
             string _fullName = openFileDialog2.FileName;
             string _fileName = System.IO.Path.GetFileName(_fullName);
-            string sourcePath = @"D:\_builds\прочее";
+            string sourcePath = SOURCEPATH; // @"D:\_builds\прочее";
 
             var _d = new System.Windows.Forms.FolderBrowserDialog();
             _d.ShowDialog();
@@ -118,23 +124,9 @@ namespace WpfApplication1
                 MessageBox.Show("Новые папки созданы!"," ",MessageBoxButton.OK);
                 getUpdateListFS();
             }
-            string newFileName = System.IO.Path.GetRandomFileName();    //создание файла
-            newPath = System.IO.Path.Combine(newPath, newFileName);     //создание нового пути для файла
-            if (!System.IO.File.Exists(newPath))                        //создание и запись в файл
-            {
-                using (System.IO.FileStream fs = System.IO.File.Create(newPath))
-                {
-                    for (byte i = 0; i < 100; i++)
-                    {
-                        fs.WriteByte(i);
-                    }
-                }
-            }
-            
 
-            //обзор папок
-            //var _d = new System.Windows.Forms.FolderBrowserDialog();
-            //_d.ShowDialog();
+            string newFileName = "changelog";    
+            newPath = System.IO.Path.Combine(newPath, newFileName);          
         }
 
         void getListFS() // получение списка папок заданной директории
@@ -178,7 +170,7 @@ namespace WpfApplication1
                 }
             }
             //выводим полный путь к директории в которой находимся
-            label5.Content=pathToFile;
+            //label5.Content=pathToFile;
             //конец обновления
             listView1.UpdateLayout();// EndUpdate();
         }
@@ -199,12 +191,25 @@ namespace WpfApplication1
                 listView1.Items.Add(fld);
             }
         }
+        void addElemInDictionary()
+        {
+            //добавление в словарь сброки и соответствующего логфайла
+            string[] _fldl = System.IO.Directory.GetDirectories(DIR);
+            foreach (string _f in _fldl)
+            {
+                string fldname = System.IO.Path.GetFileName(_f);
+                string _logFileName = "changelog";
+                openLogFile.Add(fldname, _logFileName);
+            }
+ 
+        }
 
         private void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             listView2.UpdateLayout();
             listView2.Items.Clear();
             textBox2.Text = "";
+
             try
             {
                 if (listView1.SelectedItems.Count == 0)
@@ -218,13 +223,28 @@ namespace WpfApplication1
                     listView2.Items.Add(fld);
                 }
                 listView2.UpdateLayout();
+                try
+                {
+                    //textBox4.Text = openLogFile[item].ToString();
+                    readLogFile();
+                }
+                catch
+                {
+                    MessageBox.Show("Ошибка!Файл не возможно отобразить!", "");
+                }
             }
             catch
             {
-                MessageBox.Show("Error!", ""); 
+                MessageBox.Show("Ошибка!Необходимо выбрать сборку!", ""); 
             }
         }
 
+        void readLogFile()
+        {
+            string _selFld = listView1.SelectedItem as string;
+            string _text = System.IO.File.ReadAllText(@"D:\_builds\\"+_selFld+"\\changelog");
+            textBox4.Text = _text;
+        }
         private void listView2_SelectionChanged(object sender, SelectionChangedEventArgs e) //изменение названия выбранной версии
         {
             listView2.UpdateLayout();
@@ -242,7 +262,7 @@ namespace WpfApplication1
             try
             {
                 System.IO.File.Move(pathToFile, _pathToFile2);
-                MessageBox.Show("Файл переименован!", "");
+                MessageBox.Show("Версия переименована!", "");
             }
             catch
             {
