@@ -48,7 +48,7 @@
                 <Button Content="…"  Name="button3" Click="button3_Click" Grid.Column="2" Padding="4" Margin="1"/>
             </Grid>
             <GridSplitter Grid.Row="1"  ResizeBehavior="PreviousAndNext"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Gray" ShowsPreview="True" Height="3" />
-            <TextBox Name="textBox4" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap"/>
+            <TextBox Name="textBox4" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap" TextChanged="textBox4_TextChanged" />
            
         </Grid>
 

@@ -38,37 +38,35 @@ namespace WpfApplication1
 
         private void button1_Click(object sender, RoutedEventArgs e) //кнопка ДОБАВИТЬ
         {
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            if (openFileDialog1.ShowDialog() == true)
+            OpenFileDialog _openFileDialog1 = new OpenFileDialog();
+            if (_openFileDialog1.ShowDialog() == true)
             {
-                MessageBox.Show(openFileDialog1.FileName);
+                MessageBox.Show(_openFileDialog1.FileName);
             }
-            string _fullName = openFileDialog1.FileName;
+            string _fullName = _openFileDialog1.FileName;
             string _fileName=System.IO.Path.GetFileName(_fullName);
-            string sourcePath = SOURCEPATH;  // @"D:\_builds\прочее";
+            string _sourcePath = SOURCEPATH; 
             var _dlg = new System.Windows.Forms.FolderBrowserDialog();
             _dlg.ShowDialog();
-            string targetPath = _dlg.SelectedPath;
+            string _targetPath = _dlg.SelectedPath;
+            string _sourceFile = System.IO.Path.Combine(_sourcePath, _fileName);
+            string _destFile = System.IO.Path.Combine(_targetPath, _fileName);
 
-            //string targetPath = @"D:\_builds\сборка2";
-            string sourceFile = System.IO.Path.Combine(sourcePath, _fileName);
-            string destFile = System.IO.Path.Combine(targetPath, _fileName);
-
-            if (!System.IO.Directory.Exists(targetPath))
+            if (!System.IO.Directory.Exists(_targetPath))
             {
-                System.IO.Directory.CreateDirectory(targetPath);
+                System.IO.Directory.CreateDirectory(_targetPath);
             }
 
-            System.IO.File.Copy(sourceFile, destFile, true);
+            System.IO.File.Copy(_sourceFile, _destFile, true);
 
-            if (System.IO.Directory.Exists(sourcePath))
+            if (System.IO.Directory.Exists(_sourcePath))
             {
-                string[] files = System.IO.Directory.GetFiles(sourcePath);
-                foreach (string s in files)
+                string[] _files = System.IO.Directory.GetFiles(_sourcePath);
+                foreach (string _s in _files)
                 {
-                    _fullName = System.IO.Path.GetFileName(s);
-                    destFile = System.IO.Path.Combine(targetPath, _fullName);
-                    System.IO.File.Copy(s, destFile, true);
+                    _fullName = System.IO.Path.GetFileName(_s);
+                    _destFile = System.IO.Path.Combine(_targetPath, _fullName);
+                    System.IO.File.Copy(_s, _destFile, true);
                 }
             }
             else
@@ -79,54 +77,49 @@ namespace WpfApplication1
 
         private void button3_Click(object sender, RoutedEventArgs e) //кнопка добавления новой версии
         {
-            OpenFileDialog openFileDialog2 = new OpenFileDialog();
-            if (openFileDialog2.ShowDialog() == true)
+            OpenFileDialog _openFileDialog2 = new OpenFileDialog();
+            if (_openFileDialog2.ShowDialog() == true)
             {
-                MessageBox.Show(openFileDialog2.FileName);
+                MessageBox.Show(_openFileDialog2.FileName);
             }
-            string _fullName = openFileDialog2.FileName;
+            string _fullName = _openFileDialog2.FileName;
             string _fileName = System.IO.Path.GetFileName(_fullName);
-            string sourcePath = SOURCEPATH; // @"D:\_builds\прочее";
-
+            string _sourcePath = SOURCEPATH; // @"D:\_builds\прочее";
             var _d = new System.Windows.Forms.FolderBrowserDialog();
             _d.ShowDialog();
-            string targetPath = _d.SelectedPath;  // @"D:\_builds\1\files";
+            string _targetPath = _d.SelectedPath;  // @"D:\_builds\1\files";
+            string _sourceFile = System.IO.Path.Combine(_sourcePath, _fileName);
+            string _destFile = System.IO.Path.Combine(_targetPath, _fileName);
+            System.IO.File.Copy(_sourceFile, _destFile, true);
 
-            string sourceFile = System.IO.Path.Combine(sourcePath, _fileName);
-            string destFile = System.IO.Path.Combine(targetPath, _fileName);
-
-            System.IO.File.Copy(sourceFile, destFile, true);
-
-            if (System.IO.Directory.Exists(sourcePath))
+            if (System.IO.Directory.Exists(_sourcePath))
             {
-                string[] files = System.IO.Directory.GetFiles(sourcePath);
-                foreach (string s in files)
+                string[] _files = System.IO.Directory.GetFiles(_sourcePath);
+                foreach (string _s in _files)
                 {
-                    _fullName = System.IO.Path.GetFileName(s);
-                    destFile = System.IO.Path.Combine(targetPath, _fullName);
-                    System.IO.File.Copy(s, destFile, true);
+                    _fullName = System.IO.Path.GetFileName(_s);
+                    _destFile = System.IO.Path.Combine(_targetPath, _fullName);
+                    System.IO.File.Copy(_s, _destFile, true);
                 }
                 MessageBox.Show("Сборки успешно добавлены!", " ", MessageBoxButton.OK);
                 getUpdateListFS();
-            }
-           
+            }          
         }
 
         private void button4_Click(object sender, RoutedEventArgs e) // кнопка добавления новой сборки
         {
-            string activeDir = @"D:\_builds";                               //указание активной папки
-            string newPath = System.IO.Path.Combine(activeDir, textBox1.Text); //подпапка для сборки
-            System.IO.Directory.CreateDirectory(newPath);                   //создание подпапки для сборки
-            string newPath1 = System.IO.Path.Combine(newPath, "files");     //подпапка "files" папки "сборка N" 
-            System.IO.Directory.CreateDirectory(newPath1);                  //создание подпапки files
-            if (System.IO.Directory.Exists(newPath1))
+            string _activeDir = DIR;                               //указание активной папки
+            string _newPath = System.IO.Path.Combine(_activeDir, textBox1.Text); //подпапка для сборки
+            System.IO.Directory.CreateDirectory(_newPath);                   //создание подпапки для сборки
+            string _newPath1 = System.IO.Path.Combine(_newPath, "files");     //подпапка "files" папки "сборка N" 
+            System.IO.Directory.CreateDirectory(_newPath1);                  //создание подпапки files
+            if (System.IO.Directory.Exists(_newPath1))
             {
                 MessageBox.Show("Новые папки созданы!"," ",MessageBoxButton.OK);
                 getUpdateListFS();
             }
-
-            string newFileName = "changelog";    
-            newPath = System.IO.Path.Combine(newPath, newFileName);          
+            string _newFileName = "changelog";    
+            _newPath = System.IO.Path.Combine(_newPath, _newFileName);          
         }
 
         void getListFS() // получение списка папок заданной директории
@@ -136,13 +129,11 @@ namespace WpfApplication1
             textBox2.Text = "";
             if (pathToFile == "") //если значение пути пустое
             {
-                string[] folders = System.IO.Directory.GetDirectories(@"D:\_builds");
-                //получаем имена логических дисков в компе              
-                //string[] drivers = System.IO.Directory.GetLogicalDrives();
-                foreach (string fldFull in folders)
+                string[] _folders = System.IO.Directory.GetDirectories(DIR);
+                foreach (string _fldFull in _folders)
                 {
-                    string fld = System.IO.Path.GetFileName(fldFull);
-                    listView1.Items.Add(fld);
+                    string _fld = System.IO.Path.GetFileName(_fldFull);
+                    listView1.Items.Add(_fld);
                 }
             }
             else
@@ -150,18 +141,18 @@ namespace WpfApplication1
                 try
                 {
                     //получаем список директорий
-                    string[] dirs = System.IO.Directory.GetDirectories(pathToFile);
-                    foreach (string s in dirs)
+                    string[] _dirs = System.IO.Directory.GetDirectories(pathToFile);
+                    foreach (string _s in _dirs)
                     {
-                        string dirname = System.IO.Path.GetFileName(s);
-                        listView1.Items.Add(dirname);
+                        string _dirname = System.IO.Path.GetFileName(_s);
+                        listView1.Items.Add(_dirname);
                     }
                     //получаем список файлов
-                    string[] files = System.IO.Directory.GetFiles(pathToFile);
-                    foreach (var s in files)
+                    string[] _files = System.IO.Directory.GetFiles(pathToFile);
+                    foreach (var _s in _files)
                     {
-                        string filename = System.IO.Path.GetFileName(s);
-                        listView1.Items.Add(filename);
+                        string _filename = System.IO.Path.GetFileName(_s);
+                        listView1.Items.Add(_filename);
                     }
                 }
                 catch
@@ -169,10 +160,8 @@ namespace WpfApplication1
                     MessageBox.Show("Error", "");
                 }
             }
-            //выводим полный путь к директории в которой находимся
-            //label5.Content=pathToFile;
             //конец обновления
-            listView1.UpdateLayout();// EndUpdate();
+            listView1.UpdateLayout();
         }
 
         void getUpdateListFS() //обновленный список сборок после добавления новой сборки
@@ -182,26 +171,24 @@ namespace WpfApplication1
             listView2.UpdateLayout();
             listView2.Items.Clear();
             textBox2.Text = "";
-            string[] folders = System.IO.Directory.GetDirectories(@"D:\_builds");
-            //получаем имена логических дисков в компе              
-            //string[] drivers = System.IO.Directory.GetLogicalDrives();
-            foreach (string fldFull in folders)
+            string[] _folders = System.IO.Directory.GetDirectories(DIR);
+            foreach (string _fldFull in _folders)
             {
-                string fld = System.IO.Path.GetFileName(fldFull);
-                listView1.Items.Add(fld);
+                string _fld = System.IO.Path.GetFileName(_fldFull);
+                listView1.Items.Add(_fld);
             }
         }
+
         void addElemInDictionary()
         {
             //добавление в словарь сброки и соответствующего логфайла
             string[] _fldl = System.IO.Directory.GetDirectories(DIR);
             foreach (string _f in _fldl)
             {
-                string fldname = System.IO.Path.GetFileName(_f);
+                string _fldname = System.IO.Path.GetFileName(_f);
                 string _logFileName = "changelog";
-                openLogFile.Add(fldname, _logFileName);
+                openLogFile.Add(_fldname, _logFileName);
             }
- 
         }
 
         private void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -215,17 +202,16 @@ namespace WpfApplication1
                 if (listView1.SelectedItems.Count == 0)
                     return;
                 item = listView1.SelectedItem as string;
-                pathToFile = @"D:\_builds\" + item.ToString() + "\\files";
-                string[] folders = System.IO.Directory.GetFiles(pathToFile, "*.rar");
-                foreach (string fldFull in folders)
+                pathToFile = DIR+"\\" + item.ToString() + "\\files";
+                string[] _folders = System.IO.Directory.GetFiles(pathToFile, "*.rar");
+                foreach (string _fldFull in _folders)
                 {
-                    string fld = System.IO.Path.GetFileName(fldFull);
-                    listView2.Items.Add(fld);
+                    string _fld = System.IO.Path.GetFileName(_fldFull);
+                    listView2.Items.Add(_fld);
                 }
                 listView2.UpdateLayout();
                 try
                 {
-                    //textBox4.Text = openLogFile[item].ToString();
                     readLogFile();
                 }
                 catch
@@ -239,12 +225,42 @@ namespace WpfApplication1
             }
         }
 
-        void readLogFile()
+        private void readLogFile()
         {
             string _selFld = listView1.SelectedItem as string;
-            string _text = System.IO.File.ReadAllText(@"D:\_builds\\"+_selFld+"\\changelog");
-            textBox4.Text = _text;
+            string _text = System.IO.File.ReadAllText(DIR+"\\"+_selFld+"\\changelog");
+            var _list=new List<VersionText>();
+            var _pair=new VersionText(){ VersName="",VersText=""};
+            bool flag=false;
+            bool firstEquals=false; //первое вхождение "===="
+            foreach (var _line in Tools.ReadFrom(DIR+"\\"+_selFld+"\\changelog"))
+            {
+                if (_line=="====")
+                {
+                    if (flag)
+                    {
+                        _list.Add(_pair);
+                    }                 
+                    _pair=new VersionText() { VersName="",VersText=""};
+                    firstEquals=false;                    
+                }               
+                else
+                {
+                    if (firstEquals)
+                    {
+                        _pair.VersText +="\n"+_line;
+                    }
+                    else
+                    {
+                        _pair.VersName+=_line;
+                        firstEquals=true;
+                    }                
+                }
+            }
+            string _tmp=DIR+"\\"+_selFld+"\\changelog";
+            textBox4.Text = _text;         
         }
+
         private void listView2_SelectionChanged(object sender, SelectionChangedEventArgs e) //изменение названия выбранной версии
         {
             listView2.UpdateLayout();
@@ -252,13 +268,25 @@ namespace WpfApplication1
                 return;
             itemVers = listView2.SelectedItem as string;
             textBox2.Text = itemVers;
-        }
+            //поиск в changelog по выбранной версии
+            string _tmp = "====\r";
+            string _tmpVer = "Версия " + itemVers;
+            string _a = textBox4.Text;
+            string[] _split = _a.Split(new Char[] { '\n' });
+            bool flag = false;
 
+            CommandBinding bind = new CommandBinding();
+            
+            
+
+            
+        }
+           
         private void button5_Click(object sender, RoutedEventArgs e) //функция изменения названия версии
         {
             string _item = listView2.SelectedItem as string;
-            pathToFile = @"D:\_builds\" + item.ToString() + "\\files\\" + itemVers.ToString();
-            string _pathToFile2 = @"D:\_builds\" + item.ToString() + "\\files\\" + textBox2.Text;
+            pathToFile = DIR+"\\" + item.ToString() + "\\files\\" + itemVers.ToString();
+            string _pathToFile2 = DIR+"\\" + item.ToString() + "\\files\\" + textBox2.Text;
             try
             {
                 System.IO.File.Move(pathToFile, _pathToFile2);
@@ -272,16 +300,33 @@ namespace WpfApplication1
             listView2.UpdateLayout();
             listView2.Items.Clear();
             textBox2.Text = "";
-            pathToFile = @"D:\_builds\" + item.ToString() + "\\files";
+            pathToFile = DIR+"\\" + item.ToString() + "\\files";
 
-            string[] folders = System.IO.Directory.GetFiles(pathToFile, "*.rar");
-            foreach (string fldFull in folders)
+            string[] _folders = System.IO.Directory.GetFiles(pathToFile, "*.rar");
+            foreach (string _fldFull in _folders)
             {
-                string fld = System.IO.Path.GetFileName(fldFull);
-                listView2.Items.Add(fld);
+                string _fld = System.IO.Path.GetFileName(_fldFull);
+                listView2.Items.Add(_fld);
             }
             listView2.UpdateLayout();           
         }
+
+        private void textBox4_TextChanged(object sender, TextChangedEventArgs e) //если что-то поменяли в текстбоксе, то записываем в логфайл
+        {
+            try
+            {
+                string _selFld = listView1.SelectedItem as string;
+                string _tmp = @"D:\_builds\\" + _selFld + "\\changelog";
+                string _changeText = textBox4.Text;
+                System.IO.File.WriteAllText(_tmp, _changeText);
+            }
+            catch
+            {
+                MessageBox.Show("Не удалось сохранить изменения в changlog!", "");
+            }
+        }
+
+
 
         
 
