@@ -1,4 +1,5 @@
 ﻿<Window x:Class="WpfApplication1.MainWindow"
+        x:Name="w_form"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Система управления версиями сборок" Height="623" Width="1088">
@@ -13,14 +14,14 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ListView  Name="listView1" SelectionChanged="listView1_SelectionChanged" Grid.Row="0"/>
+            <ListView  Name="v_listViewSbor" SelectionChanged="v_listViewSbor_SelectionChanged" Grid.Row="0"/>
             <Grid Grid.Row="1" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="80*"/>
                 </Grid.ColumnDefinitions>
-                <Button Content="+"  Name="button4" Click="button4_Click" Padding="4" Grid.Column="0" Margin="1"/>
-                <TextBox  Name="textBox1" Grid.Column="1" Margin="1"/>
+                <Button Content="+"  Name="v_btnAddSbor" Click="v_btnAddSbor_Click" Padding="4" Grid.Column="0" Margin="1"/>
+                <TextBox  Name="v_tbSborName" Grid.Column="1" Margin="1"/>
             </Grid>
         </Grid>
         <GridSplitter Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Gray" ShowsPreview="True" Width="3"/>
@@ -29,52 +30,26 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="30*"/>
                 <RowDefinition Height="Auto"/>
-                <!--<RowDefinition Height="Auto"/>-->
                 <RowDefinition Height="70*"/>
             </Grid.RowDefinitions>
-            
-            <ListView  Name="listView2"  SelectionChanged="listView2_SelectionChanged" Grid.Row="0"/>
-            <!--<GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="Gray" ShowsPreview="True" Height="3"/>-->
+
+            <ListView  Name="v_listViewVers"  ItemsSource="{Binding Path=VersionList,ElementName=w_form}" Grid.Row="0" DisplayMemberPath="VersName" SelectedItem="{Binding Path=SelectedVersion, ElementName=w_form }"/>
 
             <Grid Grid.Row="1" Margin="0,3,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="80*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                
-                <Button Content="+"   Name="button5"  Click="button5_Click" Grid.Column="0" Padding="4" Margin="1"/>
-                <TextBox   Name="textBox2" Grid.Column="1" Margin="1" />
-                <Button Content="…"  Name="button3" Click="button3_Click" Grid.Column="2" Padding="4" Margin="1"/>
+
+                <Button Content="+"   Name="v_btnChangeVersName"  Click="v_btnChangeVersName_Click" Grid.Column="0" Padding="4" Margin="1"/>
+                <TextBox   Name="v_tbVersName" Grid.Column="1" Margin="1" />
+                <Button Content="…"  Name="v_btnAddNewVers" Click="v_btnAddNewVers_Click" Grid.Column="2" Padding="4" Margin="1"/>
+                <Button Content="Сохранить"  Name="v_btnSaveTextChange" Grid.Column="3" Padding="4" Margin="1" Click="v_tbDisplayFile_TextChanged" />
             </Grid>
             <GridSplitter Grid.Row="1"  ResizeBehavior="PreviousAndNext"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Gray" ShowsPreview="True" Height="3" />
-            <TextBox Name="textBox4" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap" TextChanged="textBox4_TextChanged" />
-           
+            <TextBox Name="v_tbDisplayFile" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding Path=SelectedVersion.VersText, ElementName=w_form}"/>          
         </Grid>
-
-
-        <!--<Button Content="Добавить" Height="23" HorizontalAlignment="Left" Margin="835,425,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="button1_Click" />
-        <Button Content="Просмотр" Height="23" HorizontalAlignment="Right" Margin="0,283,643,0" Name="button2" VerticalAlignment="Top" Width="75" Grid.Column="1" />
-        <Label Content="Изменения:" Height="28" HorizontalAlignment="Left" Margin="747,419,0,0" Name="label1" VerticalAlignment="Top" />
-        <ComboBox Height="23" HorizontalAlignment="Left" Margin="747,445,0,0" Name="comboBox1" VerticalAlignment="Top" Width="75">
-            <ComboBoxItem Content="+ добавления" />
-            <ComboBoxItem Content="* примечания" />
-            <ComboBoxItem Content="* изменения" />
-            <ComboBoxItem Content="- удаления" />
-        </ComboBox>
-        <TreeView Height="46" HorizontalAlignment="Left" Margin="585,422,0,0" Name="treeView1" VerticalAlignment="Top" Width="156">
-            <TreeViewItem Header="Группа изменений">
-                <TreeViewItem Header="длждлж" />
-            </TreeViewItem>
-        </TreeView>
-        <Label Content="Добавить сборки(версии):" Height="28" HorizontalAlignment="Left" Margin="308,424,0,0" Name="label2" VerticalAlignment="Top" />
-       
-        
-        <Label Content="Label" HorizontalAlignment="Left" Margin="524,422,0,134" Name="label4" Visibility="Hidden" />
-        
-        <Label Content="Label" Height="27" HorizontalAlignment="Left" Margin="292,362,0,0" Name="label5" VerticalAlignment="Top" Width="226" />
-        <Button Content="Назад" Height="23" HorizontalAlignment="Left" Name="button6" VerticalAlignment="Top" Width="75" Margin="835,457,0,0" />
-    
-        <TextBox Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="98,611,0,0" Name="textBox3" VerticalAlignment="Top" Width="120" />-->
     </Grid>
 </Window>
