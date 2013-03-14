@@ -25,7 +25,7 @@
             </Grid>
         </Grid>
         <GridSplitter Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Gray" ShowsPreview="True" Width="3"/>
-        
+
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30*"/>
@@ -33,7 +33,7 @@
                 <RowDefinition Height="70*"/>
             </Grid.RowDefinitions>
 
-            <ListView  Name="v_listViewVers"  ItemsSource="{Binding Path=VersionList,ElementName=w_form}" Grid.Row="0" DisplayMemberPath="VersName" SelectedItem="{Binding Path=SelectedVersion, ElementName=w_form }"/>
+            <ListView  Name="v_listViewVers"  ItemsSource="{Binding Path=VersionList,ElementName=w_form}" Grid.Row="0" DisplayMemberPath="VersName" />
 
             <Grid Grid.Row="1" Margin="0,3,0,0">
                 <Grid.ColumnDefinitions>
@@ -43,13 +43,37 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Content="+"   Name="v_btnChangeVersName"  Click="v_btnChangeVersName_Click" Grid.Column="0" Padding="4" Margin="1"/>
+                <Button Content="Переименовать"   Name="v_btnChangeVersName"  Click="v_btnChangeVersName_Click" Grid.Column="0" Padding="4" Margin="1">
+
+                    <Button.Style>
+                        <Style TargetType="Button" >
+                            <Setter Property="IsEnabled" Value="True"></Setter>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=SelectedItem, ElementName=v_listViewSbor}"  Value="{x:Null}" >
+                                    <Setter Property="IsEnabled" Value="False"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+
+                </Button>
                 <TextBox   Name="v_tbVersName" Grid.Column="1" Margin="1" />
-                <Button Content="…"  Name="v_btnAddNewVers" Click="v_btnAddNewVers_Click" Grid.Column="2" Padding="4" Margin="1"/>
+                <Button Content="+"  Name="v_btnAddNewVers" Click="v_btnAddNewVers_Click" Grid.Column="2" Padding="4" Margin="1">
+                    <Button.Style>
+                        <Style TargetType="Button" >
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=SelectedItem, ElementName=v_listViewSbor}"  Value="{x:Null}" >
+                                    <Setter Property="IsEnabled" Value="False"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
                 <Button Content="Сохранить"  Name="v_btnSaveTextChange" Grid.Column="3" Padding="4" Margin="1" Click="v_tbDisplayFile_TextChanged" />
             </Grid>
             <GridSplitter Grid.Row="1"  ResizeBehavior="PreviousAndNext"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Gray" ShowsPreview="True" Height="3" />
-            <TextBox Name="v_tbDisplayFile" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding Path=SelectedVersion.VersText, ElementName=w_form}"/>          
+            <TextBox Name="v_tbDisplayFile" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding Path=SelectedItem.VersText, ElementName=v_listViewVers}"/>
         </Grid>
     </Grid>
 </Window>

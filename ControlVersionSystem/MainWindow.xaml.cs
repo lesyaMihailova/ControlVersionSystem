@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
+using System.Collections.ObjectModel;
 
 namespace WpfApplication1
 {
@@ -24,7 +25,7 @@ namespace WpfApplication1
         const string SOURCEPATH = @"D:\_builds\прочее";
         const string DIR = @"D:\_builds";
         Dictionary<string, string> openLogFile = new Dictionary<string, string>();
-            
+
         public MainWindow()
         {
             InitializeComponent();
@@ -35,73 +36,79 @@ namespace WpfApplication1
         string item; //для сборки
         string itemVers; //для версии
 
-        public VersionText SelectedVersion
+        public ObservableCollection<VersionText> VersionList
         {
-            get { return (VersionText)GetValue(SelectedVersionProperty); }
-            set { SetValue(SelectedVersionProperty, value); }
-        }
-
-        // Using a DependencyProperty as the backing store for SelectedVersion.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty SelectedVersionProperty =
-            DependencyProperty.Register("SelectedVersion", typeof(VersionText), typeof(MainWindow), new UIPropertyMetadata(null));
-
-
-        public List<VersionText> VersionList
-        {
-            get { return (List<VersionText>)GetValue(VersionListProperty); }
+            get { return (ObservableCollection<VersionText>)GetValue(VersionListProperty); }
             set { SetValue(VersionListProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for VersionList.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty VersionListProperty =
-            DependencyProperty.Register("VersionList", typeof(List<VersionText>), typeof(MainWindow), new UIPropertyMetadata(null));
+            DependencyProperty.Register("VersionList", typeof(ObservableCollection<VersionText>), typeof(MainWindow), new UIPropertyMetadata(null));
 
 
         private void v_btnAddNewVers_Click(object sender, RoutedEventArgs e) //кнопка добавления новой версии
         {
-            OpenFileDialog _openFileDialog2 = new OpenFileDialog();
-            if (_openFileDialog2.ShowDialog() == true)
+            if (v_listViewSbor.SelectedItem != null)
             {
-                MessageBox.Show(_openFileDialog2.FileName);
-            }
-            string _fullName = _openFileDialog2.FileName;
-            string _fileName = System.IO.Path.GetFileName(_fullName);
-            string _sourcePath = SOURCEPATH; 
-            var _d = new System.Windows.Forms.FolderBrowserDialog();
-            _d.ShowDialog();
-            string _targetPath = _d.SelectedPath;  
-            string _sourceFile = System.IO.Path.Combine(_sourcePath, _fileName);
-            string _destFile = System.IO.Path.Combine(_targetPath, _fileName);
-            System.IO.File.Copy(_sourceFile, _destFile, true);
 
-            if (System.IO.Directory.Exists(_sourcePath))
-            {
-                string[] _files = System.IO.Directory.GetFiles(_sourcePath);
-                foreach (string _s in _files)
+                OpenFileDialog _openFileDialog2 = new OpenFileDialog();
+                if (_openFileDialog2.ShowDialog() == true)
                 {
-                    _fullName = System.IO.Path.GetFileName(_s);
-                    _destFile = System.IO.Path.Combine(_targetPath, _fullName);
-                    System.IO.File.Copy(_s, _destFile, true);
+                    //MessageBox.Show(_openFileDialog2.FileName);
+                    string _fullName = _openFileDialog2.FileName;
+                    string _fileName = System.IO.Path.GetFileName(_fullName);
+                    string _sourcePath = SOURCEPATH;
+                    bool _overwrite=false;
+                    //var _d = new System.Windows.Forms.FolderBrowserDialog();
+                    //_d.ShowDialog();
+
+                    string _targetPath = System.IO.Path.Combine(DIR, v_listViewSbor.SelectedItem.ToString(), "files", _fileName);
+                    string _sourceFile = System.IO.Path.Combine(_sourcePath, _fileName);
+                    //string _destFile = System.IO.Path.Combine(_targetPath, _fileName);
+                    if (System.IO.Directory.Exists(_targetPath))
+                    {                   
+                        var _mbResult=MessageBox.Show("Файл уже существует! Заменить? ", " ", MessageBoxButton.YesNo,MessageBoxImage.Question);
+                        _overwrite=_mbResult==MessageBoxResult.Yes;
+                    }
+                    try
+                    {
+                        System.IO.File.Copy(_sourceFile, _targetPath, _overwrite);
+                        VersionList.Add(new VersionText() { VersName = "Версия " + _fileName, VersText = "" });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Произошла ошибка!", ex.ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
-                MessageBox.Show("Сборки успешно добавлены!", " ", MessageBoxButton.OK);
-                getUpdateListFS();
-            }          
+            }
+
         }
 
         private void v_btnAddSbor_Click(object sender, RoutedEventArgs e) // кнопка добавления новой сборки
         {
             string _activeDir = DIR;                               //указание активной папки
             string _newPath = System.IO.Path.Combine(_activeDir, v_tbSborName.Text); //подпапка для сборки
-            System.IO.Directory.CreateDirectory(_newPath);                   //создание подпапки для сборки
-            string _newPath1 = System.IO.Path.Combine(_newPath, "files");     //подпапка "files" папки "сборка N" 
-            System.IO.Directory.CreateDirectory(_newPath1);                  //создание подпапки files
-            if (System.IO.Directory.Exists(_newPath1))
+            try
             {
-                MessageBox.Show("Новые папки созданы!"," ",MessageBoxButton.OK);
+                System.IO.Directory.CreateDirectory(_newPath);                   //создание подпапки для сборки
+                string _newPath1 = System.IO.Path.Combine(_newPath, "files");     //подпапка "files" папки "сборка N" 
+                System.IO.Directory.CreateDirectory(_newPath1);                  //создание подпапки files
+                string _newFileName = "changelog";
+                _newPath = System.IO.Path.Combine(_newPath, _newFileName);
+                System.IO.File.Create(_newPath);
+
+                if (System.IO.Directory.Exists(_newPath1))
+                {
+                    MessageBox.Show("Новые папки созданы!", " ", MessageBoxButton.OK);
+                    getUpdateListFS();
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Новые папки добавлены не корректно!Повторите попытку!", " ", MessageBoxButton.OK);
                 getUpdateListFS();
             }
-            string _newFileName = "changelog";    
-            _newPath = System.IO.Path.Combine(_newPath, _newFileName);          
         }
 
         void getListFS() // получение списка папок заданной директории
@@ -159,6 +166,8 @@ namespace WpfApplication1
                 string _fld = System.IO.Path.GetFileName(_fldFull);
                 v_listViewSbor.Items.Add(_fld);
             }
+            v_listViewSbor.UpdateLayout();
+            v_listViewVers.UpdateLayout();
         }
 
         void addElemInDictionary()
@@ -175,43 +184,13 @@ namespace WpfApplication1
 
         private void v_listViewSbor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //v_listViewVers.UpdateLayout();
-            //v_listViewVers.Items.Clear();
-            //v_tbVersName.Text = "";
-
-            ////try
-            ////{
-            //    if (v_listViewSbor.SelectedItems.Count == 0)
-            //        return;
-            //    item = v_listViewSbor.SelectedItem as string;
-            //    pathToFile = DIR+"\\" + item.ToString() + "\\files";
-            //    string[] _folders = System.IO.Directory.GetFiles(pathToFile, "*.rar");
-            //    //foreach (string _fldFull in _folders)
-            //    //{
-            //    //    string _fld = System.IO.Path.GetFileName(_fldFull);
-            //    //    v_listViewVers.Items.Add(_fld);
-            //    //}
-            //    v_listViewVers.UpdateLayout();
-            //    //try
-            //    //{
-                    readLogFile();
-                //}
-                //catch
-                //{
-                    //MessageBox.Show("Ошибка!Файл не возможно отобразить!", "");
-            //    }
-            //}
-            //catch
-            //{
-            //    MessageBox.Show("Ошибка!Необходимо выбрать сборку!", "");
-            //}
+            readLogFile();
         }
 
         private void readLogFile()
         {
             string _selFld = v_listViewSbor.SelectedItem as string;
-            //string _text = System.IO.File.ReadAllText(DIR+"\\"+_selFld+"\\changelog");
-            var _list = new List<VersionText>();
+            var _list = new ObservableCollection<VersionText>();
             var _pair = new VersionText() { VersName = "", VersText = "" };
             bool flag = false;
             bool firstEquals = false; //первое вхождение "===="
@@ -231,7 +210,7 @@ namespace WpfApplication1
                 {
                     if (firstEquals)
                     {
-                        _pair.VersText += "\n" + _line;
+                        _pair.VersText += _line + "\n";
                     }
                     else
                     {
@@ -254,36 +233,18 @@ namespace WpfApplication1
             if (v_listViewVers.SelectedItems.Count == 0)
                 return;
             itemVers = v_listViewVers.SelectedItem as string;
-            v_tbVersName.Text = itemVers;    
+            v_tbVersName.Text = itemVers;
         }
-           
+
         private void v_btnChangeVersName_Click(object sender, RoutedEventArgs e) //функция изменения названия версии
         {
-            string _item = v_listViewVers.SelectedItem as string;
-            pathToFile = DIR+"\\" + item.ToString() + "\\files\\" + itemVers.ToString();
-            string _pathToFile2 = DIR + "\\" + item.ToString() + "\\files\\" + v_tbVersName.Text;
-            try
-            {
-                System.IO.File.Move(pathToFile, _pathToFile2);
-                MessageBox.Show("Версия переименована!", "");
-            }
-            catch
-            {
-                MessageBox.Show("Не удалось!", "");
-            }
-            v_tbVersName.Text = "";
-            v_listViewVers.UpdateLayout();
-            v_listViewVers.Items.Clear();
-            v_tbVersName.Text = "";
-            pathToFile = DIR+"\\" + item.ToString() + "\\files";
-
-            string[] _folders = System.IO.Directory.GetFiles(pathToFile, "*.rar");
-            foreach (string _fldFull in _folders)
-            {
-                string _fld = System.IO.Path.GetFileName(_fldFull);
-                v_listViewVers.Items.Add(_fld);
-            }
-            v_listViewVers.UpdateLayout();           
+            string _txt = v_tbVersName.Text;
+            var _curVers = v_listViewVers.SelectedItem as VersionText;
+            _curVers.VersName = _txt;
+            //readLogFile();
+           
+            
+            
         }
 
         private void v_btnSaveTextChange_Click(object sender, RoutedEventArgs e)
@@ -302,9 +263,8 @@ namespace WpfApplication1
                 foreach (var _s in _tmpList)
                 {
                     _changeText += "====\r\n";
-                    _changeText += _s.VersName;//+Environment.NewLine;
-                    _changeText += _s.VersText + Environment.NewLine;
-
+                    _changeText += _s.VersName + Environment.NewLine;
+                    _changeText += _s.VersText;// +Environment.NewLine;
                 }
                 System.IO.File.WriteAllText(_tmp, _changeText);
             }
