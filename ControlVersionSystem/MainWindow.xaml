@@ -43,8 +43,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Button Content="Переименовать"   Name="v_btnChangeVersName"  Click="v_btnChangeVersName_Click" Grid.Column="0" Padding="4" Margin="1">
-
+                <Button Content="Переименовать"  Name="v_btnChangeVersName"  Click="v_btnChangeVersName_Click" Grid.Column="0" Padding="4" Margin="1">
                     <Button.Style>
                         <Style TargetType="Button" >
                             <Setter Property="IsEnabled" Value="True"></Setter>
@@ -70,7 +69,18 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Button Content="Сохранить"  Name="v_btnSaveTextChange" Grid.Column="3" Padding="4" Margin="1" Click="v_tbDisplayFile_TextChanged" />
+                <Button Content="Сохранить"  Name="v_btnSaveTextChange" Grid.Column="3" Padding="4" Margin="1" Click="v_tbDisplayFile_TextChanged">
+                    <Button.Style>
+                        <Style TargetType="Button" >
+                            <Setter Property="IsEnabled" Value="True"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Path=SelectedItem, ElementName=v_listViewVers}"  Value="{x:Null}" >
+                                    <Setter Property="IsEnabled" Value="False"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>                 
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
             <GridSplitter Grid.Row="1"  ResizeBehavior="PreviousAndNext"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Gray" ShowsPreview="True" Height="3" />
             <TextBox Name="v_tbDisplayFile" Grid.Row="2" AcceptsReturn="True" TextWrapping="Wrap" Text="{Binding Path=SelectedItem.VersText, ElementName=v_listViewVers}"/>

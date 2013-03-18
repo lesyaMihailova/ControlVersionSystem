@@ -30,7 +30,7 @@ namespace WpfApplication1
         {
             InitializeComponent();
             getListFS();
-            addElemInDictionary();
+            //addElemInDictionary();
         }
         string pathToFile = "";
         string item; //для сборки
@@ -57,28 +57,29 @@ namespace WpfApplication1
                 {
                     //MessageBox.Show(_openFileDialog2.FileName);
                     string _fullName = _openFileDialog2.FileName;
-                    string _fileName = System.IO.Path.GetFileName(_fullName);
-                    string _sourcePath = SOURCEPATH;
-                    bool _overwrite=false;
+                    var _fileName = System.IO.Path.GetFileName(_fullName);
+                    //string _sourcePath = SOURCEPATH;
+                    bool _overwrite = false;
                     //var _d = new System.Windows.Forms.FolderBrowserDialog();
                     //_d.ShowDialog();
 
                     string _targetPath = System.IO.Path.Combine(DIR, v_listViewSbor.SelectedItem.ToString(), "files", _fileName);
-                    string _sourceFile = System.IO.Path.Combine(_sourcePath, _fileName);
+                    string _sourceFile = _fullName;
+                    // string _sourceFile = System.IO.Path.Combine(_sourcePath, _fileName);
                     //string _destFile = System.IO.Path.Combine(_targetPath, _fileName);
                     if (System.IO.Directory.Exists(_targetPath))
-                    {                   
-                        var _mbResult=MessageBox.Show("Файл уже существует! Заменить? ", " ", MessageBoxButton.YesNo,MessageBoxImage.Question);
-                        _overwrite=_mbResult==MessageBoxResult.Yes;
+                    {
+                        var _mbResult = MessageBox.Show("Файл уже существует! Заменить? ", " ", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        _overwrite = _mbResult == MessageBoxResult.Yes;
                     }
                     try
                     {
                         System.IO.File.Copy(_sourceFile, _targetPath, _overwrite);
-                        VersionList.Add(new VersionText() { VersName = "Версия " + _fileName, VersText = "" });
+                        VersionList.Add(new VersionText() { VersName = "Версия " + v_tbVersName.Text, VersText = "" });
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Произошла ошибка!", ex.ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(ex.ToString(),"Произошла ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -88,25 +89,33 @@ namespace WpfApplication1
         private void v_btnAddSbor_Click(object sender, RoutedEventArgs e) // кнопка добавления новой сборки
         {
             string _activeDir = DIR;                               //указание активной папки
+            if (v_tbSborName.Text == "")
+            {
+                MessageBox.Show("Не указано название новой сборки!", " ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+
             string _newPath = System.IO.Path.Combine(_activeDir, v_tbSborName.Text); //подпапка для сборки
             try
             {
-                System.IO.Directory.CreateDirectory(_newPath);                   //создание подпапки для сборки
-                string _newPath1 = System.IO.Path.Combine(_newPath, "files");     //подпапка "files" папки "сборка N" 
-                System.IO.Directory.CreateDirectory(_newPath1);                  //создание подпапки files
-                string _newFileName = "changelog";
-                _newPath = System.IO.Path.Combine(_newPath, _newFileName);
-                System.IO.File.Create(_newPath);
-
-                if (System.IO.Directory.Exists(_newPath1))
+                if (v_tbSborName.Text != "")
                 {
-                    MessageBox.Show("Новые папки созданы!", " ", MessageBoxButton.OK);
-                    getUpdateListFS();
+                    System.IO.Directory.CreateDirectory(_newPath);                   //создание подпапки для сборки
+                    string _newPath1 = System.IO.Path.Combine(_newPath, "files");     //подпапка "files" папки "сборка N" 
+                    System.IO.Directory.CreateDirectory(_newPath1);                  //создание подпапки files
+                    string _newFileName = "changelog";
+                    _newPath = System.IO.Path.Combine(_newPath, _newFileName);
+                    System.IO.File.Create(_newPath).Close();
+
+                    if (System.IO.Directory.Exists(_newPath1))
+                    {
+                        MessageBox.Show("Новые папки созданы!", " ", MessageBoxButton.OK);
+                        getUpdateListFS();
+                    }
                 }
             }
             catch
             {
-                MessageBox.Show("Новые папки добавлены не корректно!Повторите попытку!", " ", MessageBoxButton.OK);
+                MessageBox.Show("Новые папки добавлены не корректно!Повторите попытку!", " ", MessageBoxButton.OK, MessageBoxImage.Error);
                 getUpdateListFS();
             }
         }
@@ -170,17 +179,17 @@ namespace WpfApplication1
             v_listViewVers.UpdateLayout();
         }
 
-        void addElemInDictionary()
-        {
-            //добавление в словарь сброки и соответствующего логфайла
-            string[] _fldl = System.IO.Directory.GetDirectories(DIR);
-            foreach (string _f in _fldl)
-            {
-                string _fldname = System.IO.Path.GetFileName(_f);
-                string _logFileName = "changelog";
-                openLogFile.Add(_fldname, _logFileName);
-            }
-        }
+        //void addElemInDictionary()
+        //{
+        //    //добавление в словарь сброки и соответствующего логфайла
+        //    string[] _fldl = System.IO.Directory.GetDirectories(DIR);
+        //    foreach (string _f in _fldl)
+        //    {
+        //        string _fldname = System.IO.Path.GetFileName(_f);
+        //        string _logFileName = "changelog";
+        //        openLogFile.Add(_fldname, _logFileName);
+        //    }
+        //}
 
         private void v_listViewSbor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -238,13 +247,30 @@ namespace WpfApplication1
 
         private void v_btnChangeVersName_Click(object sender, RoutedEventArgs e) //функция изменения названия версии
         {
-            string _txt = v_tbVersName.Text;
-            var _curVers = v_listViewVers.SelectedItem as VersionText;
-            _curVers.VersName = _txt;
-            //readLogFile();
-           
-            
-            
+            try
+            {
+                if (v_listViewVers.SelectedItems.Count == 0)
+                {
+                    MessageBox.Show("Выберите версию для изменения названия!", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+                else
+                {
+                    if (v_tbVersName.Text != "")
+                    {
+                        string _txt = v_tbVersName.Text;
+                        var _curVers = v_listViewVers.SelectedItem as VersionText;
+                        _curVers.VersName = _txt;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Введите новое название версии!", "", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Не удалось изменить название версии!", "", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void v_btnSaveTextChange_Click(object sender, RoutedEventArgs e)
@@ -266,12 +292,17 @@ namespace WpfApplication1
                     _changeText += _s.VersName + Environment.NewLine;
                     _changeText += _s.VersText;// +Environment.NewLine;
                 }
-                System.IO.File.WriteAllText(_tmp, _changeText);
+                System.IO.File.WriteAllText(_tmp, _changeText);               
             }
             catch
             {
                 MessageBox.Show("Не удалось сохранить изменения в changlog!", "");
             }
+
+        }
+
+        private void v_btnChangeVersName_SourceUpdated(object sender, DataTransferEventArgs e)
+        {
 
         }
     }
