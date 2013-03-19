@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace WpfApplication1
 {
@@ -29,8 +30,9 @@ namespace WpfApplication1
         public MainWindow()
         {
             InitializeComponent();
+            checkDirectoryExist(DIR);
             getListFS();
-            //addElemInDictionary();
+
         }
         string pathToFile = "";
         string item; //для сборки
@@ -46,6 +48,23 @@ namespace WpfApplication1
         public static readonly DependencyProperty VersionListProperty =
             DependencyProperty.Register("VersionList", typeof(ObservableCollection<VersionText>), typeof(MainWindow), new UIPropertyMetadata(null));
 
+        void checkDirectoryExist(string target)
+        {
+            bool _create = false;
+            if (Directory.Exists(target) == false)
+            {
+                var _mbResult=MessageBox.Show("Директория _builds не существует! Создать?", "Ошибка", MessageBoxButton.YesNo, MessageBoxImage.Error);
+                _create = _mbResult == MessageBoxResult.Yes;
+                try
+                {
+                    Directory.CreateDirectory(DIR);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), "Произошла ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
 
         private void v_btnAddNewVers_Click(object sender, RoutedEventArgs e) //кнопка добавления новой версии
         {
@@ -79,7 +98,7 @@ namespace WpfApplication1
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(ex.ToString(),"Произошла ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(ex.ToString(), "Произошла ошибка!", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
@@ -292,7 +311,7 @@ namespace WpfApplication1
                     _changeText += _s.VersName + Environment.NewLine;
                     _changeText += _s.VersText;// +Environment.NewLine;
                 }
-                System.IO.File.WriteAllText(_tmp, _changeText);               
+                System.IO.File.WriteAllText(_tmp, _changeText);
             }
             catch
             {
