@@ -14,14 +14,20 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ListView  Name="v_listViewSbor" SelectionChanged="v_listViewSbor_SelectionChanged" Grid.Row="0"/>
+            <ListView  Name="v_listViewSbor" ItemsSource="{Binding Path=AssemblyList,ElementName=w_form}" SelectionChanged="v_listViewSbor_SelectionChanged" Grid.Row="0"/>
             <Grid Grid.Row="1" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="80*"/>
+                    <ColumnDefinition Width="15*"/>
                 </Grid.ColumnDefinitions>
                 <Button Content="+"  Name="v_btnAddSbor" Click="v_btnAddSbor_Click" Padding="4" Grid.Column="0" Margin="1"/>
                 <TextBox  Name="v_tbSborName" Grid.Column="1" Margin="1"/>
+                <Button   Name="v_btnUpdate"  Grid.Column="2" Margin="1" Click="getListFS">
+                    <Button.Background>
+                        <ImageBrush ImageSource="/ControlVersionSystem;component/11.png" Stretch="Fill" TileMode="None" />
+                    </Button.Background>
+                </Button>
             </Grid>
         </Grid>
         <GridSplitter Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="Gray" ShowsPreview="True" Width="3"/>
@@ -70,7 +76,7 @@
                     </Button.Style>
                 </Button>
                 <Button Content="Сохранить"  Name="v_btnSaveTextChange" Grid.Column="3" Padding="4" Margin="1" Click="v_tbDisplayFile_TextChanged">
-                    <Button.Style>
+                    <!--<Button.Style>
                         <Style TargetType="Button" >
                             <Setter Property="IsEnabled" Value="True"/>
                             <Style.Triggers>
@@ -79,7 +85,7 @@
                                 </DataTrigger>
                             </Style.Triggers>  
                         </Style>
-                    </Button.Style>
+                    </Button.Style>-->
                 </Button>
             </Grid>
             <GridSplitter Grid.Row="1"  ResizeBehavior="PreviousAndNext"  HorizontalAlignment="Stretch" VerticalAlignment="Top" Background="Gray" ShowsPreview="True" Height="3" />

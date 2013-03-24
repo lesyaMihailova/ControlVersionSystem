@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace WpfApplication1
 {
@@ -22,21 +24,22 @@ namespace WpfApplication1
     /// </summary>
     public partial class MainWindow : Window
     {
+        
         public string folderName;
-        const string SOURCEPATH = @"D:\_builds\прочее";
-        const string DIR = @"D:\_builds";
-        Dictionary<string, string> openLogFile = new Dictionary<string, string>();
+        string itemVers; //для версии
+        string DIR = "";
+        string textTemplate = @"template.xml";
+        string[] TextTemplate = {"Включает сборки:", "Изменения:", "     +", "     *", "     -", "Группа изменений", "     +", "     *", "     -", "Примечания", "     *" };
 
         public MainWindow()
         {
             InitializeComponent();
+            string _fileName = @"config.xml";
+            DIR=readConfig(_fileName);
+            //readTemplate(textTemplate);
             checkDirectoryExist(DIR);
-            getListFS();
-
+            getListFS();          
         }
-        string pathToFile = "";
-        string item; //для сборки
-        string itemVers; //для версии
 
         public ObservableCollection<VersionText> VersionList
         {
@@ -48,12 +51,60 @@ namespace WpfApplication1
         public static readonly DependencyProperty VersionListProperty =
             DependencyProperty.Register("VersionList", typeof(ObservableCollection<VersionText>), typeof(MainWindow), new UIPropertyMetadata(null));
 
+        public ObservableCollection<string> AssemblyList
+        {
+            get { return (ObservableCollection<string>)GetValue(AssemblyListProperty); }
+            set { SetValue(AssemblyListProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for AssemblyList.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty AssemblyListProperty =
+            DependencyProperty.Register("AssemblyList", typeof(ObservableCollection<string>), typeof(MainWindow), new UIPropertyMetadata(null));
+
+        private string readConfig(string fileName)
+        {
+            string _s = "";
+            string _fileName = fileName;
+            XmlDocument xd = new XmlDocument();
+            FileStream fs = new FileStream(_fileName, FileMode.Open);
+            xd.Load(fs);
+
+            foreach (XmlNode _node in xd.DocumentElement.ChildNodes)
+            {
+                foreach (XmlAttribute attr in _node.Attributes)
+                {
+                    _s = attr.Value;
+                }
+            }
+            return _s;
+        }
+
+        void readTemplate(string path)
+        {
+            string _path = path;
+            XmlDocument _doc = new XmlDocument();
+            FileStream fs = new FileStream(_path, FileMode.Open);
+            _doc.Load(fs);
+            foreach (XmlNode _tml in _doc.DocumentElement.ChildNodes)
+            {
+                foreach (XmlAttribute _attr in _tml.Attributes)
+                {
+                    string _s = _attr.Name + ":" + _attr.Value;
+                }
+                foreach (XmlNode ch in _tml.ChildNodes)
+                {
+                    string _s1 = ch.Name + "-" + ch.Value;
+                }
+                MessageBox.Show(_tml.InnerText);
+            }
+        }
+
         void checkDirectoryExist(string target)
         {
             bool _create = false;
             if (Directory.Exists(target) == false)
             {
-                var _mbResult=MessageBox.Show("Директория _builds не существует! Создать?", "Ошибка", MessageBoxButton.YesNo, MessageBoxImage.Error);
+                var _mbResult = MessageBox.Show("Директория _builds не существует! Создать?", "Ошибка", MessageBoxButton.YesNo, MessageBoxImage.Error);
                 _create = _mbResult == MessageBoxResult.Yes;
                 try
                 {
@@ -70,22 +121,15 @@ namespace WpfApplication1
         {
             if (v_listViewSbor.SelectedItem != null)
             {
-
                 OpenFileDialog _openFileDialog2 = new OpenFileDialog();
                 if (_openFileDialog2.ShowDialog() == true)
                 {
-                    //MessageBox.Show(_openFileDialog2.FileName);
                     string _fullName = _openFileDialog2.FileName;
                     var _fileName = System.IO.Path.GetFileName(_fullName);
-                    //string _sourcePath = SOURCEPATH;
                     bool _overwrite = false;
-                    //var _d = new System.Windows.Forms.FolderBrowserDialog();
-                    //_d.ShowDialog();
 
                     string _targetPath = System.IO.Path.Combine(DIR, v_listViewSbor.SelectedItem.ToString(), "files", _fileName);
                     string _sourceFile = _fullName;
-                    // string _sourceFile = System.IO.Path.Combine(_sourcePath, _fileName);
-                    //string _destFile = System.IO.Path.Combine(_targetPath, _fileName);
                     if (System.IO.Directory.Exists(_targetPath))
                     {
                         var _mbResult = MessageBox.Show("Файл уже существует! Заменить? ", " ", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -94,7 +138,12 @@ namespace WpfApplication1
                     try
                     {
                         System.IO.File.Copy(_sourceFile, _targetPath, _overwrite);
-                        VersionList.Add(new VersionText() { VersName = "Версия " + v_tbVersName.Text, VersText = "" });
+
+                        for (var i = 0; i < TextTemplate.Length; i++)
+                        {
+                            v_tbDisplayFile.AppendText(TextTemplate[i] + Environment.NewLine);
+                        }
+                        VersionList.Add(new VersionText() { VersName = "Версия " + v_tbVersName.Text, VersText = v_tbDisplayFile.Text });
                     }
                     catch (Exception ex)
                     {
@@ -102,7 +151,6 @@ namespace WpfApplication1
                     }
                 }
             }
-
         }
 
         private void v_btnAddSbor_Click(object sender, RoutedEventArgs e) // кнопка добавления новой сборки
@@ -127,88 +175,30 @@ namespace WpfApplication1
 
                     if (System.IO.Directory.Exists(_newPath1))
                     {
-                        MessageBox.Show("Новые папки созданы!", " ", MessageBoxButton.OK);
-                        getUpdateListFS();
+                        getListFS();
                     }
                 }
             }
-            catch
+            catch (Exception exp)
             {
-                MessageBox.Show("Новые папки добавлены не корректно!Повторите попытку!", " ", MessageBoxButton.OK, MessageBoxImage.Error);
-                getUpdateListFS();
+                MessageBox.Show(exp.ToString(), " ", MessageBoxButton.OK, MessageBoxImage.Error);
+                getListFS();
             }
         }
 
-        void getListFS() // получение списка папок заданной директории
+        void getListFS(object sender, RoutedEventArgs e) // получение списка папок заданной директории
         {
-            v_listViewSbor.UpdateLayout();
-            v_listViewSbor.Items.Clear();
             v_tbVersName.Text = "";
-            if (pathToFile == "") //если значение пути пустое
-            {
-                string[] _folders = System.IO.Directory.GetDirectories(DIR);
-                foreach (string _fldFull in _folders)
-                {
-                    string _fld = System.IO.Path.GetFileName(_fldFull);
-                    v_listViewSbor.Items.Add(_fld);
-                }
-            }
-            else
-            {
-                try
-                {
-                    //получаем список директорий
-                    string[] _dirs = System.IO.Directory.GetDirectories(pathToFile);
-                    foreach (string _s in _dirs)
-                    {
-                        string _dirname = System.IO.Path.GetFileName(_s);
-                        v_listViewSbor.Items.Add(_dirname);
-                    }
-                    //получаем список файлов
-                    string[] _files = System.IO.Directory.GetFiles(pathToFile);
-                    foreach (var _s in _files)
-                    {
-                        string _filename = System.IO.Path.GetFileName(_s);
-                        v_listViewSbor.Items.Add(_filename);
-                    }
-                }
-                catch
-                {
-                    MessageBox.Show("Error", "");
-                }
-            }
-            //конец обновления
-            v_listViewSbor.UpdateLayout();
-        }
+            var _aslist = new ObservableCollection<string>();
 
-        void getUpdateListFS() //обновленный список сборок после добавления новой сборки
-        {
-            v_listViewSbor.UpdateLayout();
-            v_listViewSbor.Items.Clear();
-            v_listViewVers.UpdateLayout();
-            v_listViewVers.Items.Clear();
-            v_tbVersName.Text = "";
             string[] _folders = System.IO.Directory.GetDirectories(DIR);
             foreach (string _fldFull in _folders)
             {
                 string _fld = System.IO.Path.GetFileName(_fldFull);
-                v_listViewSbor.Items.Add(_fld);
+                _aslist.Add(_fld);
             }
-            v_listViewSbor.UpdateLayout();
-            v_listViewVers.UpdateLayout();
+            AssemblyList = _aslist;
         }
-
-        //void addElemInDictionary()
-        //{
-        //    //добавление в словарь сброки и соответствующего логфайла
-        //    string[] _fldl = System.IO.Directory.GetDirectories(DIR);
-        //    foreach (string _f in _fldl)
-        //    {
-        //        string _fldname = System.IO.Path.GetFileName(_f);
-        //        string _logFileName = "changelog";
-        //        openLogFile.Add(_fldname, _logFileName);
-        //    }
-        //}
 
         private void v_listViewSbor_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -317,12 +307,14 @@ namespace WpfApplication1
             {
                 MessageBox.Show("Не удалось сохранить изменения в changlog!", "");
             }
-
         }
 
         private void v_btnChangeVersName_SourceUpdated(object sender, DataTransferEventArgs e)
         {
-
         }
+
+        private void getListFS()
+        {
+        }       
     }
 }
